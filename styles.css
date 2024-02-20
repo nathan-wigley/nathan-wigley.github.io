@@ -1,39 +1,112 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #18191A;
+    font-family: 'Source Code Pro', monospace;
+    background-color: #242526;
     color: white;
     margin: 0;
     padding: 0;
-    text-align: center;
+    text-align: left;
+    font-size: 1.1rem;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: auto;
     padding: 20px;
 }
 
 header h1 {
-    font-size: 2.5em;
+    margin-top: 175px;
+    text-align: left;
+    font-size: 50px;
     margin-bottom: 0;
 }
 
 header p {
-    font-size: 1.2em;
-    margin-top: 10px;
-}
-
-nav a {
-    color: #FFDB58;
-    text-decoration: none;
-    margin: 0 10px;
-    font-size: 1.2em;
-}
-
-nav a:hover {
-    text-decoration: underline;
+    text-align: left;
+    font-size: 1.4em;
+    margin-top: 5px;
 }
 
 .about-me {
-    margin-top: 50px;
+    margin-top: 30px;
+    line-height: 1.4;
+    font-size: 1.1rem;
+}
+
+.about-me a {
+    color: #FFDB58;
+    text-decoration: none;
+    position: relative; /* Needed for positioning the pseudo-element */
+    display: inline-block; /* Ensures the pseudo-element aligns correctly */
+}
+
+.social-links a {
+    position: relative;
+    display: inline-block;
+}
+
+.social-links a:hover::after {
+    display: none; /* Ensures no underline effect on hover */
+}
+
+.social-links a::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    background: transparent;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    transform: translateX(0);
+}
+
+.about-me a::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px; /* Thickness of the underline */
+    background: #FFDB58;
+    transition: width 0.3s ease-in-out;
+    position: absolute;
+    left: 0;
+    bottom: -2px; /* Adjust this value to move the underline up or down */
+    transform: translateX(0);
+}
+
+.about-me a:hover::after {
+    width: 100%; /* Extend the underline on hover */
+}
+
+.social-logo {
+    width: 55px;
+    margin-left: 250px;
+    margin-top: 70px;
+    opacity: 0.8;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.social-logo:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.social-logo:hover::after {
+    content: none; /* This will remove the underline effect */
+}
+
+
+@media screen and (max-width: 600px) {
+    .container {
+        width: 90%;
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    header p {
+        font-size: 1em;
+    }
 }
