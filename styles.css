@@ -92,7 +92,23 @@ header p {
 }
 
 .social-logo:hover::after {
-    content: none; /* This will remove the underline effect */
+    content: none;
+}
+
+.terminal-section {
+    margin-top: 30px;
+    padding: 1px;
+    background-color: #242526;
+    border-radius: 5px;
+    width: 700px;
+    align-items: center;
+}
+
+.terminal-section #terminal {
+    height: 300px;
+    color: #fff;
+    width: 700px;
+    background-color: #242526
 }
 
 
@@ -109,4 +125,5 @@ header p {
     header p {
         font-size: 1em;
     }
+
 }
