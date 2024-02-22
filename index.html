@@ -12,8 +12,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>Nathan Wigley</h1>
-            <p style="color: #FFDB58 ;">Software Developer</p>
+            <h1><span id="stuttered-name"></span></h1>
+            <p style="color: #FFDB58;">Software Developer <span class="dev-symbol">&#60;/&#62;</span></p>
         </header>
         <section class="about-me">
             <p>Hi, my name is Nathan, and I am a student in Western Australia currently studying Software Engineering. If you'd like to know more about my professional journey, connect with me on <a href="https://www.linkedin.com" target="_blank">LinkedIn</a>, see some of my projects on <a href="https://www.github.com" target="_blank">GitHub</a>, or get in touch via <a href="mailto:nathan.wigley@hotmail.com">Email</a>. I look forward to hearing from you!</p>
@@ -31,7 +31,14 @@
         </section>
         <section class="terminal-section">
             <div id="terminal"></div>
+            <div id="text-editor" style="display: none;">
+                <textarea id="editor-content"></textarea>
+                <button onclick="saveFile()">Save</button>
+                <button onclick="closeEditor()">Close</button>
+                <div id="vim-hint">Press 'Esc' then type ':wq' and 'Enter' to save and exit.</div>
+            </div>
         </section>
+        
     </div>
     <script src="index.js"></script>
 </body>

@@ -13,11 +13,11 @@ const fileSystem = {
     home: {
         nathan: {
             "portfolio": {
-                "about.txt": "I am a software developer...",
-                "contact.txt": "Email: nathan.wigley@hotmail.com",
+                "about.txt": "I am a software dev focused on building both my front and back end skills :)",
+                "contact_me.txt": "Email: nathan.wigley@hotmail.com",
                 "projects":{
-                    "project1.txt": "Project 1 details...",
-                    "project2.txt": "Project 2 details..."
+                    "portfolio.txt": "I built this portfolio all by myself! See it on my [[b;#50e0ff;]GitHub]",
+                    "crl_database.txt": "With a team of peers, I helped build a UI to\nstreamline univeristy admissions"
                 },
             },
         }
@@ -39,20 +39,17 @@ function getPath(path) {
 function ls() {
     const path = getPath(currentPath);
     const items = Object.keys(path).map(item => {
-        // Color-code .txt files in green
         const color = item.endsWith('.txt') ? '#33cc33' : '#ffffff';
 
         if (typeof path[item] === 'object') {
-            // Directories in blue
             return '[[b;#50e0ff;]/' + item + ']';
         } else {
-            // Files in their respective colors
             return `[[b;${color};]${item}]`;
         }
     });
 
     const maxLength = items.reduce((max, item) => Math.max(max, item.length), 0);
-    const columnWidth = maxLength + 4; // Adding extra space for padding
+    const columnWidth = maxLength + 4;
     const numColumns = Math.floor($('#terminal').width() / columnWidth);
 
     let output = '';
@@ -157,6 +154,109 @@ function whereami() {
     return '/' + currentPath.join('/') + '/';
 }
 
+function typeStutteredName() {
+    const nameElement = document.getElementById('stuttered-name');
+    const fullName = 'Nathan Wigley';
+    let currentText = '';
+    const cursorSpan = document.createElement('span');
+    cursorSpan.classList.add('cursor');
+    nameElement.appendChild(cursorSpan);
+
+    function typeLetter(index) {
+        if (index < fullName.length) {
+            currentText += fullName[index];
+            nameElement.textContent = currentText;
+            nameElement.appendChild(cursorSpan);
+            setTimeout(() => typeLetter(index + 1), Math.random() * 300 + 200);
+        } else {
+            setTimeout(() => {
+                currentText = '';
+                nameElement.textContent = '';
+                nameElement.appendChild(cursorSpan);
+                typeLetter(0);
+            }, Math.random() * 3000 + 5000);
+        }
+    }
+    setTimeout(() => typeLetter(0), 2000);
+}
+let editingFile = null;
+let isVimMode = false;
+let vimCommand = '';
+
+function vi(filename) {
+    const path = getPath(currentPath);
+    if (filename in path) {
+        document.getElementById('editor-content').value = path[filename];
+        document.getElementById('text-editor').style.display = 'block';
+        document.getElementById('vim-hint').style.display = 'block';
+        $('#terminal').hide();
+        editingFile = filename;
+        isVimMode = false;
+        vimCommand = '';
+    } else {
+        return 'File not found';
+    }
+}
+
+function handleVimCommands(key) {
+    if (isVimMode) {
+        vimCommand += key;
+        if (vimCommand === ':wq') {
+            saveFile();
+            closeEditor();
+            $('#terminal').show();
+        } else if (vimCommand.length > 3 || (vimCommand.length > 1 && vimCommand[0] !== ':')) {
+            vimCommand = '';
+            isVimMode = false;
+        }
+    }
+}
+
+function saveFile() {
+    const editorContent = document.getElementById('editor-content').value;
+    if (editingFile) {
+        let path = fileSystem;
+        for (let i = 0; i < currentPath.length; i++) {
+            path = path[currentPath[i]];
+        }
+        path[editingFile] = editorContent;
+    }
+}
+
+function closeEditor() {
+    document.getElementById('text-editor').style.display = 'none';
+    $('#text-editor').hide();
+    $('#terminal').show();
+    editingFile = null;
+    isVimMode = false;
+    vimCommand = '';
+}
+
+document.addEventListener('DOMContentLoaded', typeStutteredName);
+document.addEventListener('DOMContentLoaded', typeStutteredName);
+document.addEventListener('DOMContentLoaded', typeStutteredName);
+
+document.getElementById('text-editor').addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        isVimMode = true;
+        vimCommand = '';
+        e.preventDefault();
+    } else if (isVimMode) {
+        if (e.key === 'Enter') {
+            if (vimCommand === ':wq') {
+                saveFile();
+                closeEditor();
+                $('#terminal').show();
+            }
+            isVimMode = false;
+            vimCommand = '';
+            e.preventDefault();
+        } else {
+            vimCommand += e.key;
+        }
+    }
+});
+
 $(document).ready(function() {
     $('#terminal').terminal({
         hello: function(what) {
@@ -171,9 +271,10 @@ $(document).ready(function() {
         mkdir: mkdir,
         touch: touch,
         rm: rm,
-        echo: echo
+        echo: echo,
+        vi: vi,
     }, {
-        greetings: 'Nathan Wigley\'s Interactive Terminal\nType "help" to see the list of commands.',
+        greetings: '[[;#FFDB58;]Nathan\'s Interactive Terminal]\nType "help" to see the list of commands.',
         prompt: 'nathan/home/portfolio> ',
         onKeydown: function(e, term) {
             if (e.key === 'Tab') {
