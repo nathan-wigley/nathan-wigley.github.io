@@ -106,7 +106,16 @@ function cat(filename) {
     }
 }
 
+function isValidExtension(fileName) {
+    const validExtensions = ['txt', 'js', 'html', 'css', 'py'];
+    const extension = fileName.split('.').pop();
+    return validExtensions.includes(extension);
+}
+
 function touch(fileName) {
+    if (!isValidExtension(fileName)) {
+        return 'Invalid file extension';
+    }
     const path = getPath(currentPath);
     if (!(fileName in path)) {
         path[fileName] = 'Empty file';
@@ -188,48 +197,51 @@ function vi(filename) {
     if (filename in path) {
         document.getElementById('editor-content').value = path[filename];
         document.getElementById('text-editor').style.display = 'block';
-        document.getElementById('vim-hint').style.display = 'block';
+        document.getElementById('vim-hint').textContent = 'INSERT MODE';
         $('#terminal').hide();
         editingFile = filename;
         isVimMode = false;
-        vimCommand = '';
     } else {
         return 'File not found';
     }
 }
 
 function handleVimCommands(key) {
-    if (isVimMode) {
-        vimCommand += key;
-        if (vimCommand === ':wq') {
-            saveFile();
-            closeEditor();
-            $('#terminal').show();
-        } else if (vimCommand.length > 3 || (vimCommand.length > 1 && vimCommand[0] !== ':')) {
-            vimCommand = '';
-            isVimMode = false;
-        }
+    if (vimCommand === ':wq') {
+        saveFile();
+        closeEditor();
+        $('#terminal').show();
+        vimCommand = '';
+        isVimMode = false;
+    } else if (vimCommand.startsWith(':') && key === 'Enter') {
+        document.getElementById('vim-hint').textContent = 'Unrecognized command: ' + vimCommand;
+        vimCommand = '';
+        isVimMode = false;
+    } else if (key === 'Enter') {
+        vimCommand = '';
+        isVimMode = false;
     }
 }
 
 function saveFile() {
+    if (!editingFile) return;
+
     const editorContent = document.getElementById('editor-content').value;
-    if (editingFile) {
-        let path = fileSystem;
-        for (let i = 0; i < currentPath.length; i++) {
-            path = path[currentPath[i]];
-        }
-        path[editingFile] = editorContent;
+    let path = fileSystem;
+    for (let dir of currentPath) {
+        path = path[dir];
     }
+    path[editingFile] = editorContent;
+    document.getElementById('vim-hint').textContent = 'File saved';
 }
 
 function closeEditor() {
     document.getElementById('text-editor').style.display = 'none';
-    $('#text-editor').hide();
-    $('#terminal').show();
     editingFile = null;
     isVimMode = false;
     vimCommand = '';
+    $('#terminal').show();
+    document.getElementById('vim-hint').style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', typeStutteredName);
@@ -237,25 +249,52 @@ document.addEventListener('DOMContentLoaded', typeStutteredName);
 document.addEventListener('DOMContentLoaded', typeStutteredName);
 
 document.getElementById('text-editor').addEventListener('keydown', function(e) {
+    if (e.key === 'Shift') {
+        return;
+    }
     if (e.key === 'Escape') {
-        isVimMode = true;
-        vimCommand = '';
+        isVimMode = !isVimMode;
+        document.getElementById('vim-hint').textContent = isVimMode ? 'COMMAND MODE' : 'INSERT MODE';
         e.preventDefault();
     } else if (isVimMode) {
-        if (e.key === 'Enter') {
-            if (vimCommand === ':wq') {
-                saveFile();
-                closeEditor();
-                $('#terminal').show();
-            }
+        e.preventDefault();
+        if (e.key === 'i') {
             isVimMode = false;
             vimCommand = '';
-            e.preventDefault();
-        } else {
+            document.getElementById('vim-hint').textContent = 'INSERT MODE';
+            return;
+        }
+        if (e.key !== 'Enter') {
             vimCommand += e.key;
+            document.getElementById('vim-hint').textContent = `COMMAND: ${vimCommand}`;
+        } else {
+            executeVimCommand(vimCommand);
+            vimCommand = '';
+            isVimMode = false;
         }
     }
 });
+
+function executeVimCommand(command) {
+    switch (command) {
+        case ':wq':
+            saveFile();
+            closeEditor();
+            $('#terminal').show();
+            break;
+        case ':q':
+            closeEditor();
+            $('#terminal').show();
+            break;
+        case ':w':
+            saveFile();
+            document.getElementById('vim-hint').textContent = 'File saved';
+            break;
+        default:
+            document.getElementById('vim-hint').textContent = `Unknown command: ${command}`;
+            break;
+    }
+}
 
 $(document).ready(function() {
     $('#terminal').terminal({
@@ -272,7 +311,7 @@ $(document).ready(function() {
         touch: touch,
         rm: rm,
         echo: echo,
-        vi: vi,
+        vi: vi, // need this to act like the vim editor
     }, {
         greetings: '[[;#FFDB58;]Nathan\'s Interactive Terminal]\nType "help" to see the list of commands.',
         prompt: 'nathan/home/portfolio> ',
